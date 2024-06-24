@@ -1,0 +1,82 @@
+'use strict';
+
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+
+const colorElement = document.querySelector('#color');
+const widthElement = document.querySelector('#width');
+
+const body = document.querySelector('body');
+
+const socket = io();
+
+ctx.lineCap = 'round';
+ctx.imageSmoothingEnabled = false;
+
+let mouseDown = false;
+body.addEventListener('mousedown', () => {
+    mouseDown = true;
+});
+body.addEventListener('mouseup', () => {
+    mouseDown = false;
+});
+
+let color = colorElement.value;
+colorElement.addEventListener('input', () => {
+    color = colorElement.value;
+});
+let width = widthElement.value;
+widthElement.addEventListener('input', () => {
+    width = widthElement.value;
+});
+
+let mouseX;
+let mouseY;
+
+function getMouseX(x) {
+    return x - canvas.offsetLeft;
+}
+function getMouseY(y) {
+    return y - canvas.offsetTop;
+}
+
+body.addEventListener('mousemove', (event) => {
+    draw(event.x, event.y);
+    mouseX = getMouseX(event.clientX);
+    mouseY = getMouseY(event.clientY);
+
+});
+
+let drawn = [];
+
+function draw(x, y) {
+    if (mouseDown) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(mouseX, mouseY);
+        ctx.lineTo(getMouseX(x), getMouseY(y));
+        ctx.stroke();
+        drawn.push({x1: mouseX, y1: mouseY, x2: getMouseX(x), y2: getMouseY(y), color: color, width: width});
+    }
+}
+
+
+socket.on('serverToClient', (data) => {
+    if (data === null) {
+        // the client sends its data to the server
+        socket.emit('clientToServer', drawn);
+        drawn = [];
+    } else {
+        // the client draws the lines added by other clients
+        data.forEach((line) => {
+            ctx.strokeStyle = line.color
+            ctx.lineWidth = line.width;
+            ctx.beginPath();
+            ctx.moveTo(line.x1, line.y1);
+            ctx.lineTo(line.x2, line.y2);
+            ctx.stroke();
+        })
+    }
+})
+

@@ -1,0 +1,15 @@
+canvas {
+    border: solid black;
+    margin: auto;
+    margin-bottom: 10px;
+    display: block;
+}
+#color {
+    margin: auto;
+    display: block;
+    margin-bottom: 10px;
+}
+#width {
+    margin: auto;
+    display: block;
+}
