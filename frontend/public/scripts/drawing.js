@@ -48,6 +48,8 @@ body.addEventListener('mousemove', (event) => {
 });
 
 let drawn = [];
+let sendingData = false; // if it's currently sending data, then it will send more data every time the server asks for data. if data is currently
+// not being sent, then it will start sending data once you start drawing
 
 function draw(x, y) {
     if (mouseDown) {
@@ -58,12 +60,22 @@ function draw(x, y) {
         ctx.lineTo(getMouseX(x), getMouseY(y));
         ctx.stroke();
         drawn.push({x1: mouseX, y1: mouseY, x2: getMouseX(x), y2: getMouseY(y), color: color, width: width});
+
+        if (!sendingData) {
+            socket.emit('clientToServer', drawn);
+            drawn = [];
+            sendingData = true;
+        }
     }
 }
 
-
 socket.on('serverToClient', (data) => {
     if (data === null) {
+        if (drawn.length === 0 || !sendingData) {
+            sendingData = false;
+            return;
+        }
+
         // the client sends its data to the server
         socket.emit('clientToServer', drawn);
         drawn = [];
