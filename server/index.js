@@ -25,21 +25,30 @@ function returnPage(request, response, page) {
     })
 }
 
-
 app.get('/', (request, response) => {
     returnPage(request, response, 'home.html');
 });
 
+let room;
+function resetGame() {
+    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (0.2*60)};
+    setTimeout(room.endTime*1000 - Date.now()).then(() => {
+        resetGame();
+        io.emit('firstConnection', room.allLinesDrawn, room.endTime);
+    })
+}
+resetGame();
+
+
 const perSecond = 40; // how many times per second data is sent between the clients
-let allLinesDrawn = [];
 
 io.on('connection', (socket) => {
     console.log('New user connected.');
-    socket.emit('serverToClient', allLinesDrawn);
+    socket.emit('firstConnection', room.allLinesDrawn, room.endTime);
 
 
     socket.on('clientToServer', (data) => {
-        allLinesDrawn.push(...data);
+        room.allLinesDrawn.push(...data);
         setTimeout(1000/perSecond).then(() => {
             socket.broadcast.emit('serverToClient', data);
             socket.emit('serverToClient', null);

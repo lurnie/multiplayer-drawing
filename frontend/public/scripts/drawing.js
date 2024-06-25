@@ -1,6 +1,5 @@
 'use strict';
 
-
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -72,38 +71,26 @@ function draw(x, y) {
     }
 }
 
-socket.on('serverToClient', (data) => {
-    if (data === null) {
-        if (drawn.length === 0 || !sendingData) {
-            sendingData = false;
-            return;
-        }
+function addLines(data) {
+    data.forEach((line) => {
+        ctx.strokeStyle = line.color
+        ctx.lineWidth = line.width;
+        ctx.beginPath();
+        ctx.moveTo(line.x1, line.y1);
+        ctx.lineTo(line.x2, line.y2);
+        ctx.stroke();
+    });
+}
 
-        // the client sends its data to the server
-        socket.emit('clientToServer', drawn);
-        drawn = [];
-    } else {
-        // the client draws the lines added by other clients
-        data.forEach((line) => {
-            ctx.strokeStyle = line.color
-            ctx.lineWidth = line.width;
-            ctx.beginPath();
-            ctx.moveTo(line.x1, line.y1);
-            ctx.lineTo(line.x2, line.y2);
-            ctx.stroke();
-        })
-    }
-})
+socket.on('firstConnection', (data, endTime) => {
+    // first, it sets up the timer
+    const timer = document.querySelector('#timer');
+    let interval;
 
-const timer = document.querySelector('#timer');
-
-let interval;
-
-
-function setCurrentTime() {
-    let current = Date.now()/1000;
+    function setCurrentTime() {
+        let current = Date.now()/1000;
         let secondsLeft = endTime - current;
-        if (secondsLeft <= 0) {
+        if (Math.floor(secondsLeft) <= 0) {
             timer.textContent = '0:00';
             clearInterval(interval);
             return;
@@ -115,12 +102,34 @@ function setCurrentTime() {
             displaySeconds = '0' + displaySeconds;
         }
         timer.textContent = `${minutes}:${displaySeconds}`;
+    }
 
-}
+    setCurrentTime();
+    // runs every second
+    setTimeout(() => {
+        interval = setInterval(setCurrentTime, 1000);
+    }, Date.now()/1000 - Math.floor(Date.now()/1000));
 
-// runs every second
-const endTime = 1719312643;
-setCurrentTime();
-setTimeout(() => {
-    interval = setInterval(setCurrentTime, 1000);
-}, Date.now()/1000 - Math.floor(Date.now()/1000));
+    ctx.clearRect(0, 0, canvas.getAttribute('width'), canvas.getAttribute('height'));
+
+    // next, it adds all previously added lines
+    addLines(data);
+});
+
+
+socket.on('serverToClient', (data, endTime=null) => {
+    if (data === null) {
+        if (drawn.length === 0 || !sendingData) {
+            sendingData = false;
+            return;
+        }
+
+        // the client sends its data to the server
+        socket.emit('clientToServer', drawn);
+        drawn = [];
+    } else {
+        // the client draws the lines added by other clients
+        addLines(data);
+    }
+})
+
