@@ -34,10 +34,12 @@ let mouseX;
 let mouseY;
 
 function getMouseX(x) {
-    return x - canvas.offsetLeft;
+    let style = window.getComputedStyle(canvas);
+    return (x - canvas.offsetLeft) / (Number(style.getPropertyValue('width').slice(0, -2))/1000);
 }
 function getMouseY(y) {
-    return y - canvas.offsetTop;
+    let style = window.getComputedStyle(canvas);
+    return (y - canvas.offsetTop) / (Number(style.getPropertyValue('height').slice(0, -2))/500);
 }
 
 body.addEventListener('mousemove', (event) => {
