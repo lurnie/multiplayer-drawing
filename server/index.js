@@ -35,7 +35,6 @@ let allLinesDrawn = [];
 
 io.on('connection', (socket) => {
     console.log('New user connected.');
-    socket.emit('serverToClient', null);
     socket.emit('serverToClient', allLinesDrawn);
 
 

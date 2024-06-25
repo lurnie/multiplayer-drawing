@@ -1,5 +1,6 @@
 'use strict';
 
+
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -94,3 +95,32 @@ socket.on('serverToClient', (data) => {
     }
 })
 
+const timer = document.querySelector('#timer');
+
+let interval;
+
+
+function setCurrentTime() {
+    let current = Date.now()/1000;
+        let secondsLeft = endTime - current;
+        if (secondsLeft <= 0) {
+            timer.textContent = '0:00';
+            clearInterval(interval);
+            return;
+        }
+        let minutes = Math.floor(secondsLeft/60);
+        let seconds = secondsLeft - (minutes*60);
+        let displaySeconds = String(Math.floor(seconds));
+        if (displaySeconds.length === 1) {
+            displaySeconds = '0' + displaySeconds;
+        }
+        timer.textContent = `${minutes}:${displaySeconds}`;
+
+}
+
+// runs every second
+const endTime = 1719312643;
+setCurrentTime();
+setTimeout(() => {
+    interval = setInterval(setCurrentTime, 1000);
+}, Date.now()/1000 - Math.floor(Date.now()/1000));
