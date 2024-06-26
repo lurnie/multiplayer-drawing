@@ -31,10 +31,10 @@ app.get('/', (request, response) => {
 
 let room;
 function resetGame() {
-    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (1*60)};
+    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (1*60), 'prompt': 'hi'};
     setTimeout(room.endTime*1000 - Date.now()).then(() => {
         resetGame();
-        io.emit('firstConnection', room.allLinesDrawn, room.endTime);
+        io.emit('firstConnection', room.allLinesDrawn, room.endTime, room.prompt);
     })
 }
 resetGame();
@@ -44,7 +44,7 @@ const perSecond = 35; // how many times per second data is sent between the clie
 
 io.on('connection', (socket) => {
     console.log('New user connected.');
-    socket.emit('firstConnection', room.allLinesDrawn, room.endTime);
+    socket.emit('firstConnection', room.allLinesDrawn, room.endTime, room.prompt);
 
 
     socket.on('clientToServer', (data, timestamp) => {

@@ -64,7 +64,7 @@ function draw(x, y) {
         drawn.push({x1: mouseX, y1: mouseY, x2: getMouseX(x), y2: getMouseY(y), color: color, width: width});
 
         if (!sendingData) {
-            socket.emit('clientToServer', drawn);
+            socket.emit('clientToServer', drawn, Date.now());
             drawn = [];
             sendingData = true;
         }
@@ -82,8 +82,12 @@ function addLines(data) {
     });
 }
 
-socket.on('firstConnection', (data, endTime) => {
-    // first, it sets up the timer
+socket.on('firstConnection', (data, endTime, prompt) => {
+    // sets the prompt
+    const promptElement = document.querySelector('#prompt');
+    promptElement.textContent = prompt;
+    console.log(prompt)
+    // it sets up the timer
     const timer = document.querySelector('#timer');
     let interval;
 
@@ -125,7 +129,7 @@ socket.on('serverToClient', (data, endTime=null) => {
         }
 
         // the client sends its data to the server
-        socket.emit('clientToServer', drawn);
+        socket.emit('clientToServer', drawn, Date.now());
         drawn = [];
     } else {
         // the client draws the lines added by other clients

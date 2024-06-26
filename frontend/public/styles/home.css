@@ -6,21 +6,48 @@ canvas {
     max-width: 1000px;
     width: 99%;
 }
-#color {
+h1 {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     margin: auto;
-    display: block;
-    margin-bottom: 10px;
+    text-align: center;
+    width: 100%;
+}
+#input-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+#color {
+    margin: 10px;
 }
 #width {
-    margin: auto;
-    display: block;
-    margin-bottom: 10px;
+    margin: 10px;
+}
+#timer-label {
+    display: inline;
+    width: auto;
+    margin: 0;
+}
+#timer-box {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
 }
 #timer {
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-size: 150%;
-    display: block;
-    width: 10%;
+    text-align: center;
+    margin: 1%;
+}
+#prompt {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 150%;
     text-align: center;
     margin: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 100%;
+    display: block;
+
 }
