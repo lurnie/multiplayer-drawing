@@ -6,13 +6,15 @@ const server = require('http').createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server);
 
-const { readFile } = require('fs');
+const { readFile, readFileSync } = require('fs');
 const { setTimeout } = require('timers/promises');
 
 const path = '../frontend/';
 
 app.use(express.static(path + 'public'));
 
+let nouns = [];
+nouns = readFileSync(path + 'public/prompts/nouns.txt', 'utf-8').split(' ');
 
 function returnPage(request, response, page) {
     readFile(path + 'public/pages/' + page, 'utf-8', (err, html) => {
@@ -31,7 +33,8 @@ app.get('/', (request, response) => {
 
 let room;
 function resetGame() {
-    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (1*60), 'prompt': 'hi'};
+    let prompt = nouns[Math.floor(Math.random()*nouns.length)];
+    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (2*60), 'prompt': prompt};
     setTimeout(room.endTime*1000 - Date.now()).then(() => {
         resetGame();
         io.emit('firstConnection', room.allLinesDrawn, room.endTime, room.prompt);
@@ -46,7 +49,9 @@ io.on('connection', (socket) => {
     console.log('New user connected.');
     socket.emit('firstConnection', room.allLinesDrawn, room.endTime, room.prompt);
 
-
+    socket.on('disconnect', () => {
+        console.log('User disconnected.')
+    })
     socket.on('clientToServer', (data, timestamp) => {
         let timeSpent = Date.now() - timestamp;
         let timeLeft = 1000/perSecond - timeSpent;
