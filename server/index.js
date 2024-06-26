@@ -34,11 +34,17 @@ app.get('/', (request, response) => {
 let room;
 function resetGame() {
     let prompt = nouns[Math.floor(Math.random()*nouns.length)];
-    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (2*60), 'prompt': prompt};
+    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (0.2*60), 'prompt': prompt};
     setTimeout(room.endTime*1000 - Date.now()).then(() => {
-        resetGame();
-        io.emit('firstConnection', room.allLinesDrawn, room.endTime, room.prompt);
-    })
+        io.emit('gameOver');
+
+        const waitSeconds = 5; // number of seconds to wait after the round ends
+
+        setTimeout(waitSeconds * 1000).then(() => {
+            resetGame();
+            io.emit('firstConnection', room.allLinesDrawn, room.endTime, room.prompt);
+        });
+    });
 }
 resetGame();
 
@@ -56,10 +62,13 @@ io.on('connection', (socket) => {
         let timeSpent = Date.now() - timestamp;
         let timeLeft = 1000/perSecond - timeSpent;
         if (timeLeft < 0) {timeLeft = 0;}
-        room.allLinesDrawn.push(...data);
+
+        let frozen = room.endTime < Date.now()/1000; // checks if the player is allowed to keep drawing
+
+        if (!frozen) {room.allLinesDrawn.push(...data);}
         setTimeout(timeLeft).then(() => {
-            socket.broadcast.emit('serverToClient', data);
-            socket.emit('serverToClient', null);
+            if (!frozen) {socket.broadcast.emit('serverToClient', data);} // sends the new data to everyone else on the site
+            socket.emit('serverToClient', null); // sends a message to the person currently drawing in order to continue recieving information
         });
     })
 })

@@ -49,11 +49,14 @@ body.addEventListener('mousemove', (event) => {
 
 });
 
+let frozen = false;
+
 let drawn = [];
 let sendingData = false; // if it's currently sending data, then it will send more data every time the server asks for data. if data is currently
 // not being sent, then it will start sending data once you start drawing
 
 function draw(x, y) {
+    if (frozen) {return;}
     if (mouseDown) {
         ctx.strokeStyle = color;
         ctx.lineWidth = width;
@@ -83,6 +86,8 @@ function addLines(data) {
 }
 
 socket.on('firstConnection', (data, endTime, prompt) => {
+    frozen = false; // prevents the player from drawing any more. gets set to true when the game ends and before a new one starts
+
     // sets the prompt
     const promptElement = document.querySelector('#prompt');
     promptElement.textContent = prompt;
@@ -121,7 +126,7 @@ socket.on('firstConnection', (data, endTime, prompt) => {
 });
 
 
-socket.on('serverToClient', (data, endTime=null) => {
+socket.on('serverToClient', (data) => {
     if (data === null) {
         if (drawn.length === 0 || !sendingData) {
             sendingData = false;
@@ -137,3 +142,6 @@ socket.on('serverToClient', (data, endTime=null) => {
     }
 })
 
+socket.on('gameOver', () => {
+    frozen = true;
+})
