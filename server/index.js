@@ -31,7 +31,7 @@ app.get('/', (request, response) => {
 
 let room;
 function resetGame() {
-    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (0.2*60)};
+    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (1*60)};
     setTimeout(room.endTime*1000 - Date.now()).then(() => {
         resetGame();
         io.emit('firstConnection', room.allLinesDrawn, room.endTime);
@@ -40,16 +40,19 @@ function resetGame() {
 resetGame();
 
 
-const perSecond = 40; // how many times per second data is sent between the clients
+const perSecond = 35; // how many times per second data is sent between the clients
 
 io.on('connection', (socket) => {
     console.log('New user connected.');
     socket.emit('firstConnection', room.allLinesDrawn, room.endTime);
 
 
-    socket.on('clientToServer', (data) => {
+    socket.on('clientToServer', (data, timestamp) => {
+        let timeSpent = Date.now() - timestamp;
+        let timeLeft = 1000/perSecond - timeSpent;
+        if (timeLeft < 0) {timeLeft = 0;}
         room.allLinesDrawn.push(...data);
-        setTimeout(1000/perSecond).then(() => {
+        setTimeout(timeLeft).then(() => {
             socket.broadcast.emit('serverToClient', data);
             socket.emit('serverToClient', null);
         });
