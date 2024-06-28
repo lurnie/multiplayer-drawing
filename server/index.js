@@ -59,6 +59,10 @@ io.on('connection', (socket) => {
         console.log('User disconnected.')
     })
     socket.on('clientToServer', (data, timestamp) => {
+        // validating the input
+        data.forEach((dataPoint) => {if (dataPoint.width > 12) {dataPoint.width = 12;}});
+
+
         let timeSpent = Date.now() - timestamp;
         let timeLeft = 1000/perSecond - timeSpent;
         if (timeLeft < 0) {timeLeft = 0;}
