@@ -1,5 +1,4 @@
 body {
-    overflow: hidden;
     background-color: rgb(255, 18, 227);
 }
 
@@ -7,11 +6,11 @@ canvas {
     margin: auto;
     margin-bottom: 10px;
     display: block;
-    max-width: 1000px;
+    max-width: 950px;
     width: 99%;
     background-color: white;
     box-shadow: 0px 0px 10px grey inset;
-    border: 3.5px solid black;
+    border: 5px solid black;
     border-radius: 12px;
 }
 h1 {
