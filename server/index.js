@@ -33,7 +33,7 @@ app.get('/', (request, response) => {
 
 let room;
 
-const roundLength = 1.5*60;
+const roundLength = 2*60;
 
 function resetGame() {
     let prompt = nouns[Math.floor(Math.random()*nouns.length)];
