@@ -13,6 +13,7 @@ const socket = io();
 ctx.lineCap = 'round';
 ctx.imageSmoothingEnabled = false;
 
+
 let mouseDown = false;
 body.addEventListener('mousedown', () => {
     mouseDown = true;
@@ -30,6 +31,27 @@ widthElement.addEventListener('input', () => {
     width = widthElement.value;
 });
 
+canvas.addEventListener('touchstart', (event) => {
+    let touches = event.changedTouches;
+    let touch = touches[0];
+    mouseX = getMouseX(touch.pageX);
+    mouseY = getMouseY(touch.pageY);
+
+    mouseDown = true;
+})
+canvas.addEventListener('touchend', () => {
+    mouseDown = false;
+})
+canvas.addEventListener('touchmove', (event) => {
+    event.preventDefault();
+    let touches = event.changedTouches;
+    if (touches.length > 1) {return;}
+    let touch = touches[0];
+    draw(touch.pageX, touch.pageY);
+    mouseX = getMouseX(touch.pageX);
+    mouseY = getMouseY(touch.pageY);
+});
+
 let mouseX;
 let mouseY;
 
@@ -43,7 +65,7 @@ function getMouseY(y) {
 }
 
 body.addEventListener('mousemove', (event) => {
-    draw(event.x, event.y);
+    draw(event.clientX, event.clientY);
     mouseX = getMouseX(event.clientX);
     mouseY = getMouseY(event.clientY);
 
@@ -83,6 +105,7 @@ function addLines(data) {
         ctx.lineTo(line.x2, line.y2);
         ctx.stroke();
     });
+
 }
 
 socket.on('firstConnection', (data, endTime, prompt) => {
@@ -91,7 +114,7 @@ socket.on('firstConnection', (data, endTime, prompt) => {
     // sets the prompt
     const promptElement = document.querySelector('#prompt');
     promptElement.textContent = prompt;
-    console.log(prompt)
+
     // it sets up the timer
     const timer = document.querySelector('#timer');
     let interval;
