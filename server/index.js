@@ -32,9 +32,12 @@ app.get('/', (request, response) => {
 });
 
 let room;
+
+const roundLength = 1.5*60;
+
 function resetGame() {
     let prompt = nouns[Math.floor(Math.random()*nouns.length)];
-    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + (0.2*60), 'prompt': prompt};
+    room = {'allLinesDrawn': [], 'endTime': (Date.now()/1000) + roundLength, 'prompt': prompt};
     setTimeout(room.endTime*1000 - Date.now()).then(() => {
         io.emit('gameOver');
 
@@ -71,12 +74,12 @@ io.on('connection', (socket) => {
 
         if (!frozen) {room.allLinesDrawn.push(...data);}
         setTimeout(timeLeft).then(() => {
-            if (!frozen) {socket.broadcast.emit('serverToClient', data);} // sends the new data to everyone else on the site
-            socket.emit('serverToClient', null); // sends a message to the person currently drawing in order to continue recieving information
+            if (!frozen) {socket.broadcast.emit('addLines', data);} // sends the new data to everyone else on the site
+            socket.emit('getMoreData'); // sends a message to the person currently drawing in order to continue recieving information
         });
     })
-})
+});
 
 server.listen(port, () => {
     console.log(`Running on http://localhost:${port}`);
-})
+});

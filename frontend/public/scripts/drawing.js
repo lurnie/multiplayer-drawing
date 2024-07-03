@@ -149,22 +149,22 @@ socket.on('firstConnection', (data, endTime, prompt) => {
 });
 
 
-socket.on('serverToClient', (data) => {
-    if (data === null) {
-        if (drawn.length === 0 || !sendingData) {
-            sendingData = false;
-            return;
-        }
+socket.on('addLines', (data) => {
+    // the client draws the lines added by other clients
+    addLines(data);
+});
 
-        // the client sends its data to the server
-        socket.emit('clientToServer', drawn, Date.now());
-        drawn = [];
-    } else {
-        // the client draws the lines added by other clients
-        addLines(data);
+socket.on('getMoreData', () => {
+    if (drawn.length === 0 || !sendingData) {
+        sendingData = false;
+        return;
     }
-})
+
+    // the client sends its data to the server
+    socket.emit('clientToServer', drawn, Date.now());
+    drawn = [];
+});
 
 socket.on('gameOver', () => {
     frozen = true;
-})
+});
